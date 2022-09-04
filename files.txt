@@ -1,2 +1,4 @@
 ~/.spacemacs
 ~/.zshrc
+~/.fzf.bash
+~/.fzf.zsh

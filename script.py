@@ -13,7 +13,7 @@ def process():
     for file_path in content:
         file_path = os.path.expanduser(file_path.strip())
         file_name = os.path.basename(file_path)
-        if sys.argv[1] == "update":
+        if sys.argv[1] == "backup":
             print(f"Copying {file_path} to ./{file_name}")
             shutil.copy(file_path, "./")
         elif sys.argv[1] == "setup":

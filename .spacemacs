@@ -32,20 +32,24 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
-     javascript
-     python
+   '(elixir
+     go
+     rust
      csv
+     ruby
+     javascript
+     (typescript :variables
+                 typescript-fmt-tool 'prettier)
      yaml
      ;; ----------------------------------------------------------------
      ;; Example of useful layers you may want to use right away.
      ;; Uncomment some layer names and press `SPC f e R' (Vim style) or
      ;; `M-m f e R' (Emacs style) to install them.
-     ;; ----------------------------------------------------------------
+     ;; ---------------------------------------------------------------
      helm
      (auto-completion :variables
                       auto-completion-return-key-behavior 'complete
-                      auto-completion-tab-key-behavior 'cycle
+                      auto-completion-tab-key-behavior 'complete
                       auto-completion-complete-with-key-sequence (kbd "jk")
                       auto-completion-complete-with-key-sequence-delay 0.1
                       auto-completion-idle-delay 0.3
@@ -53,23 +57,21 @@ This function should only modify configuration layer settings."
                       auto-completion-enable-snippets-in-popup 't)
      ;; better-defaults
      ;; emacs-lisp
-     markdown
-     erlang
-     (elixir :variables elixir-backend 'alchemist)
+     (markdown :variables markdown-mmm-auto-modes '("c" "c++" "python" "scala" "elixir" "javascript" "json" ("elisp" "emacs-lisp")))
+     ;; erlang
      git
-     osx
      html
      org
-     sql
-     react
+     ;; react
      (shell :variables
             shell-default-height 30
             shell-default-position 'bottom
             shell-default-term-shell "/bin/zsh"
             close-window-with-terminal t)
      ;; spell-checking
-     syntax-checking
+     ;; syntax-checking
      version-control
+     svelte
      )
    ;; List of additional packages that will be installed without being wrapped
    ;; in a layer (generally the packages are installed only and should still be
@@ -79,7 +81,7 @@ This function should only modify configuration layer settings."
    ;; `dotspacemacs/user-config'. To use a local version of a package, use the
    ;; `:location' property: '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(rainbow-mode vue-mode prettier-js doom-themes move-text duplicate-thing sqlformat)
+   dotspacemacs-additional-packages '(rainbow-mode prettier-js doom-themes move-text duplicate-thing polymode)
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
 
@@ -233,7 +235,8 @@ It should only modify the values of Spacemacs settings."
    ;; List of themes, the first of the list is loaded when spacemacs starts.
    ;; Press `SPC T n' to cycle to the next theme in the list (works great
    ;; with 2 themes variants, one dark and one light)
-   dotspacemacs-themes '(doom-palenight
+   dotspacemacs-themes '(doom-zenburn
+                         doom-palenight
                          doom-vibrant
                          doom-moonlight
                          doom-dracula
@@ -247,7 +250,7 @@ It should only modify the values of Spacemacs settings."
    ;; refer to the DOCUMENTATION.org for more info on how to create your own
    ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
-   dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
+   dotspacemacs-mode-line-theme '(vim-powerline :separator wave :separator-scale 1.5)
 
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
@@ -256,12 +259,12 @@ It should only modify the values of Spacemacs settings."
    ;; Default font or prioritized list of fonts. The `:size' can be specified as
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
-   dotspacemacs-default-font '("Source Code Pro"
-                               :size 16
+   dotspacemacs-default-font '("JetBrains Mono"
+                               :size 15
                                :weight normal
-                               :width normal
-                               :powerline-scale 1.1)
-   ;; The leader key
+                               :width normal)
+
+   ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
 
    ;; The key used for Emacs commands `M-x' (after pressing on the leader key).
@@ -283,7 +286,7 @@ It should only modify the values of Spacemacs settings."
    ;; (default "C-M-m" for terminal mode, "<M-return>" for GUI mode).
    ;; Thus M-RET should work as leader key in both GUI and terminal modes.
    ;; C-M-m also should work in terminal mode, but not in GUI mode.
-   dotspacemacs-major-mode-emacs-leader-key "C-M-m"
+   dotspacemacs-major-mode-emacs-leader-key (if window-system "<C-M-m>" "C-M-m")
 
    ;; These variables control whether separate commands are bound in the GUI to
    ;; the key pairs `C-i', `TAB' and `C-m', `RET'.
@@ -401,8 +404,8 @@ It should only modify the values of Spacemacs settings."
    ;; If set to `t', `relative' or `visual' then line numbers are enabled in all
    ;; `prog-mode' and `text-mode' derivatives. If set to `relative', line
    ;; numbers are relative. If set to `visual', line numbers are also relative,
-   ;; but lines are only visual lines are counted. For example, folded lines
-   ;; will not be counted and wrapped lines are counted as multiple lines.
+   ;; but only visual lines are counted. For example, folded lines will not be
+   ;; counted and wrapped lines are counted as multiple lines.
    ;; This variable can also be set to a property list for finer control:
    ;; '(:relative nil
    ;;   :visual nil
@@ -458,7 +461,7 @@ It should only modify the values of Spacemacs settings."
    ;; List of search tool executable names. Spacemacs uses the first installed
    ;; tool of the list. Supported tools are `rg', `ag', `pt', `ack' and `grep'.
    ;; (default '("rg" "ag" "pt" "ack" "grep"))
-   dotspacemacs-search-tools '("ag" "pt" "ack" "grep")
+   dotspacemacs-search-tools '("ag" "rg" "pt" "ack" "grep")
 
    ;; Format specification for setting the frame title.
    ;; %a - the `abbreviated-file-name', or `buffer-name'
@@ -496,14 +499,14 @@ It should only modify the values of Spacemacs settings."
    ;; (default nil)
    dotspacemacs-whitespace-cleanup nil
 
-   ;; If non nil activate `clean-aindent-mode' which tries to correct
-   ;; virtual indentation of simple modes. This can interfer with mode specific
+   ;; If non-nil activate `clean-aindent-mode' which tries to correct
+   ;; virtual indentation of simple modes. This can interfere with mode specific
    ;; indent handling like has been reported for `go-mode'.
    ;; If it does deactivate it here.
    ;; (default t)
    dotspacemacs-use-clean-aindent-mode t
 
-   ;; Accept SPC as y for prompts if non nil. (default nil)
+   ;; Accept SPC as y for prompts if non-nil. (default nil)
    dotspacemacs-use-SPC-as-y nil
 
    ;; If non-nil shift your number row to match the entered keyboard layout
@@ -523,23 +526,11 @@ It should only modify the values of Spacemacs settings."
    dotspacemacs-pretty-docs nil
 
    ;; If nil the home buffer shows the full path of agenda items
-   ;; and todos. If non nil only the file name is shown.
+   ;; and todos. If non-nil only the file name is shown.
    dotspacemacs-home-shorten-agenda-source nil
 
    ;; If non-nil then byte-compile some of Spacemacs files.
    dotspacemacs-byte-compile nil))
-
-(defun my-setup-indent (n)
-  ;; web development
-  (setq javascript-indent-level n) ; javascript-mode
-  (setq js-indent-level n) ; js-mode
-  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
-  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
-  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
-  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
-  (setq css-indent-offset n) ; css-mode
-  )
-
 
 (defun dotspacemacs/user-env ()
   "Environment variables setup.
@@ -563,6 +554,16 @@ This function is called only while dumping Spacemacs configuration. You can
 `require' or `load' the libraries of your choice that will be included in the
 dump.")
 
+(defun my-setup-indent (n)
+  ;; web development
+  (setq javascript-indent-level n) ; javascript-mode
+  (setq js-indent-level n) ; js-mode
+  (setq js2-basic-offset n) ; js2-mode, in latest js2-mode, it's alias of js-indent-level
+  (setq web-mode-markup-indent-offset n) ; web-mode, html tag in html file
+  (setq web-mode-css-indent-offset n) ; web-mode, css in html file
+  (setq web-mode-code-indent-offset n) ; web-mode, js code in html file
+  (setq css-indent-offset n) ; css-mode
+  )
 
 (defun dotspacemacs/user-config ()
   "Configuration function for user code.
@@ -581,19 +582,12 @@ you should place your code here."
 
 
   ;; config for javascript mode
-  (my-setup-indent 2)
+  (my-setup-indent 4)
 
   ;; this help to enable key binding in neo tree
   (setq helm-split-window-inside-p t)
 
-  (setq auto-mode-alist
-        (cons '("\\.po\\'\\|\\.po\\." . po-mode) auto-mode-alist))
-  (autoload 'po-mode "po-mode" "Major mode for translators to edit PO files" t)
 
-  ;; elixir development
-  (add-to-list 'auto-mode-alist '("\\.htm.eex\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.htm.leex\\'" . web-mode))
-  (add-to-list 'auto-mode-alist '("\\.svelte\\'" . web-mode))
   (add-hook 'web-mode-hook
             (lambda ()
               (local-set-key (kbd "RET") 'newline-and-indent)
@@ -602,19 +596,75 @@ you should place your code here."
 
   ;; format on save
   (add-hook 'elixir-mode-hook
-            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)))
+            (lambda () (add-hook 'before-save-hook 'elixir-format nil t)
+              (local-set-key (kbd "M-.") 'xref-find-definitions)
+              ))
+  
+
+  ;; markdown in elixir-mode
+  (use-package polymode
+    :ensure t
+    ;; :mode ("\.ex$" . poly-elixir-mode)
+    :config
+    (setq polymode-prefix-key (kbd "C-c n"))
+
+    (define-hostmode poly-elixir-hostmode :mode 'elixir-mode)
+
+    (define-innermode poly-doc-innermode
+      :mode 'markdown-mode
+      :head-matcher (rx "@doc " (= 3 (char "\"")) (* (any space)))
+      :tail-matcher (rx (= 3 (char "\"")))
+      :head-mode 'host
+      :tail-mode 'host)
+
+    (define-innermode poly-moduledoc-innermode
+      :mode 'markdown-mode
+      :head-matcher (rx "@moduledoc " (= 3 (char "\"")) (* (any space)))
+      :tail-matcher (rx (= 3 (char "\"")))
+      :head-mode 'host
+      :tail-mode 'host)
+
+
+    (define-polymode poly-elixir-mode
+      :hostmode 'poly-elixir-hostmode
+      :innermodes '(poly-doc-innermode
+                    poly-moduledoc-innermode)))
+
+  ;; MARKDOWN
+  ;; Format table on save
+  ;; (add-hook 'markdown-mode-hook 'prettier-js-mode)
+  ;; (defun cleanup-org-tables ()
+  ;;   (save-excursion
+  ;;     (goto-char (point-min))
+  ;;     (while (search-forward "-+-" nil t) (replace-match "-|-"))
+  ;;     ))
+  ;; (add-hook 'markdown-mode-hook
+  ;;           (lambda()
+  ;;             (add-hook 'after-save-hook 'prettier-js)))
+  ;; (add-hook 'markdown-mode-hook
+  ;;           (lambda()
+  ;;             (add-hook 'after-save-hook 'cleanup-org-tables  nil 'make-it-local)))
+
+  (defun cleanup-org-tables ()
+    (save-excursion
+      (goto-char (point-min))
+      (while (search-forward "-+-" nil t) (replace-match "-|-"))
+      ))
+
+  (add-hook 'markdown-mode-hook 'orgtbl-mode)
+  (add-hook 'markdown-mode-hook
+            (lambda()
+              (add-hook 'after-save-hook 'cleanup-org-tables  nil 'make-it-local)))
+
+
+
 
 
   ;; Prettier format
   (add-hook 'js2-mode-hook 'prettier-js-mode)
   (add-hook 'web-mode-hook 'prettier-js-mode)
 
-  (add-hook 'python-mode-hook 'anaconda-mode)
 
-  ;; Python
-  (setq python-shell-interpreter "jupyter-console"
-        python-shell-interpreter-args "--simple-prompt"
-        python-shell-prompt-detect-failure-warning nil)
 
   ;; multiple cursors
   (global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
@@ -626,26 +676,34 @@ you should place your code here."
   (move-text-default-bindings)
   (global-set-key (kbd "C-S-d") 'duplicate-thing)
 
-  ;; SQL
-  (setq sqlformat-command 'pgformatter)
-  (setq sqlformat-args '("-s2" "-g"))
-
   ;; ORG-MODE
   (add-hook 'text-mode-hook #'turn-on-visual-line-mode)
+
+  ;; KEY BINDING
+  ;; C-A to first non whitespace character
+  (global-set-key (kbd "C-S-a") 'back-to-indentation)
   )
+
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
+(defun dotspacemacs/emacs-custom-settings ()
+  "Emacs custom settings.
+This is an auto-generated function, do not modify its content directly, use
+Emacs customize menu instead.
+This function is called at the very end of Spacemacs initialization."
 (custom-set-variables
  ;; custom-set-variables was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
+ '(evil-want-Y-yank-to-eol nil)
  '(package-selected-packages
-   '(doom-palenight-theme yasnippet-snippets yapfify yaml-mode xterm-color ws-butler winum which-key web-mode web-beautify vue-mode volatile-highlights vi-tilde-fringe uuidgen use-package undo-tree toml-mode toc-org tern tagedit sqlformat sql-indent spaceline smeargle slim-mode shell-pop scss-mode sass-mode reveal-in-osx-finder restart-emacs rainbow-mode rainbow-identifiers rainbow-delimiters racer pyvenv pytest pyenv-mode py-isort pug-mode prettier-js popwin pip-requirements persp-mode pcre2el pbcopy paradox osx-trash osx-dictionary orgit org-projectile org-present org-pomodoro org-mime org-download org-bullets open-junk-file ob-elixir neotree multi-term move-text markdown-toc magit-gitflow magit-gh-pulls lorem-ipsum livid-mode live-py-mode linum-relative link-hint launchctl json-mode js2-refactor js-doc indent-guide hy-mode hungry-delete htmlize hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-themes helm-swoop helm-pydoc helm-projectile helm-mode-manager helm-make helm-gitignore helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gnuplot github-search github-clone github-browse-file gitconfig-mode gitattributes-mode git-timemachine git-messenger git-link git-gutter-fringe git-gutter-fringe+ gist gh-md fuzzy forge flycheck-rust flycheck-pos-tip flycheck-credo flx-ido fill-column-indicator fancy-battery eyebrowse expand-region exec-path-from-shell evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-surround evil-search-highlight-persist evil-numbers evil-nerd-commenter evil-mc evil-matchit evil-lisp-state evil-indent-plus evil-iedit-state evil-exchange evil-escape evil-ediff evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help erlang emmet-mode duplicate-thing dumb-jump doom-themes diminish diff-hl cython-mode csv-mode company-web company-statistics company-anaconda column-enforce-mode color-identifiers-mode coffee-mode clean-aindent-mode cargo auto-yasnippet auto-highlight-symbol alchemist aggressive-indent adaptive-wrap ace-window ace-link ace-jump-helm-line ac-ispell)))
+   '(elixir-mode godoctor go-tag go-rename go-impl go-guru go-gen-test go-fill-struct go-eldoc flycheck-golangci-lint company-go go-mode svelte-mode toml-mode ron-mode racer pos-tip rust-mode flycheck-rust cargo csv-mode seeing-is-believing rvm ruby-tools ruby-test-mode ruby-refactor ruby-hash-syntax rubocopfmt rubocop rspec-mode robe rbenv rake minitest helm-gtags ggtags enh-ruby-mode dap-mode lsp-treemacs bui lsp-mode counsel-gtags counsel swiper ivy chruby bundler inf-ruby add-node-modules-path prettier format-all tide typescript-mode tern polymode yasnippet-snippets yaml-mode xterm-color ws-butler writeroom-mode winum which-key web-mode web-beautify vterm volatile-highlights vi-tilde-fringe uuidgen use-package undo-tree treemacs-projectile treemacs-persp treemacs-magit treemacs-icons-dired treemacs-evil toc-org terminal-here tagedit symon symbol-overlay string-inflection string-edit spaceline-all-the-icons smeargle slim-mode shell-pop scss-mode sass-mode restart-emacs request rainbow-mode rainbow-delimiters quickrun pug-mode prettier-js popwin pcre2el password-generator paradox orgit-forge org-superstar org-rich-yank org-projectile org-present org-pomodoro org-mime org-download org-contrib org-cliplink open-junk-file ob-elixir npm-mode nodejs-repl multi-term multi-line move-text mmm-mode markdown-toc lorem-ipsum livid-mode link-hint json-reformat json-navigator json-mode js2-refactor js-doc info+ indent-guide impatient-mode hybrid-mode hungry-delete hl-todo highlight-parentheses highlight-numbers highlight-indentation helm-xref helm-themes helm-swoop helm-purpose helm-projectile helm-org-rifle helm-org helm-mode-manager helm-make helm-ls-git helm-git-grep helm-flx helm-descbinds helm-css-scss helm-company helm-c-yasnippet helm-ag google-translate golden-ratio gnuplot gitignore-templates git-timemachine git-modes git-messenger git-link git-gutter-fringe gh-md fuzzy font-lock+ flycheck-credo flx-ido fancy-battery eyebrowse expand-region evil-visualstar evil-visual-mark-mode evil-unimpaired evil-tutor evil-textobj-line evil-surround evil-org evil-numbers evil-nerd-commenter evil-matchit evil-lisp-state evil-lion evil-indent-plus evil-iedit-state evil-goggles evil-exchange evil-escape evil-ediff evil-easymotion evil-collection evil-cleverparens evil-args evil-anzu eval-sexp-fu eshell-z eshell-prompt-extras esh-help erlang emmet-mode editorconfig duplicate-thing dumb-jump drag-stuff dotenv-mode doom-themes dired-quick-sort diminish define-word company-web column-enforce-mode clean-aindent-mode centered-cursor-mode browse-at-remote auto-yasnippet auto-highlight-symbol alchemist aggressive-indent ace-link ace-jump-helm-line ac-ispell)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
  ;; Your init file should contain only one such instance.
  ;; If there is more than one, they won't work right.
- )
+ '(highlight-parentheses-highlight ((nil (:weight ultra-bold))) t))
+)

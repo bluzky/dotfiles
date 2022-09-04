@@ -105,5 +105,8 @@ source $ZSH/oh-my-zsh.sh
 bindkey '^ ' autosuggest-accept
 
 [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-alias emacs=/Applications/Emacs.app/Contents/MacOS/Emacs
-export PATH=$PATH:$HOME/.elixir-ls/release
+export PATH=$PATH:/Users/flex/.asdf/shims/
+
+alias elasticmq="cd ~/apps && java -Dconfig.file=elastic.conf -jar elasticmq-server-1.3.1.jar &"
+alias start_dev="pg_ctl start && brew services start mongodb/brew/mongodb-community && brew services start redis && elasticmq"
+export PATH="/opt/homebrew/opt/openjdk/bin:$PATH"
